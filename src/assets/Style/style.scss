@@ -1,0 +1,65 @@
+// form styling
+#projectForm .ant-form-item {
+  .formLable {
+    padding: 0 0 8px;
+    line-height: 1.5715;
+    white-space: initial;
+    text-align: left;
+
+    label {
+      text-transform: capitalize;
+      font-size: 1.125rem !important;
+      line-height: 1.75rem !important;
+      font-weight: 500;
+      color: #647da7;
+    }
+  }
+}
+
+/* form button group styling */
+.form-btn-group {
+  .ant-form-item-control-input-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: end;
+  }
+  .btn-reset {
+    span {
+      position: relative;
+      transition: 0.4s;
+      &::before {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        height: 2px;
+        width: 0%;
+        background-color: black;
+        transition: 0.4s;
+      }
+      &:hover {
+        &::before {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+// Form select styling
+.ant-select-selector {
+  border-radius: 0.375rem !important;
+}
+
+// Form timetracking slider styling
+.timeTrackingSlider {
+  .ant-slider-rail {
+    height: 7px;
+    background-color: #dfe1e6 !important;
+    border-radius: 4px;
+  }
+
+  &.ant-slider-disabled .ant-slider-track {
+    background-color: #0052cc !important;
+  }
+}
