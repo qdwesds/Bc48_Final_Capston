@@ -9,11 +9,13 @@ import Profile from "./pages/Profile/Profile";
 import UserManagement from "./pages/AdminPage/UserManagement/UserManagement";
 import ProjectManagement from "./pages/ProjectPages/ProjectManagement/ProjectManagement";
 import Loading from "./components/Loading/Loading";
+import GeneralDrawer from "./components/Drawer/Drawer";
 
 function App() {
   return (
     <>
       <Loading />
+      <GeneralDrawer/>
       <Routes>
         <Route path="/" element={<UserTemplate />}>
           <Route path="sign-in" element={<SignIn />} />

@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   project: {},
-  projectList: {},
+  projectList: [],
 };
 
 const projectSlice = createSlice({

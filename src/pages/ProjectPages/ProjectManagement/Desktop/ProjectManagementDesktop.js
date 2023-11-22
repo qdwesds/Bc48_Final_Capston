@@ -1,23 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Button, Input, Space, Table, Tag } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Space, Table, Tag, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-import projectHooks from "../../../../hooks/projectHooks";
-import {
-  DeleteOutlined,
-  FormOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-
-import { projectServ } from "../../../../services/projectServ";
+import ProjectButtonAction from "./ProjectButtonAction";
 import {
   setLoadingEnd,
   setLoadingStart,
 } from "../../../../redux/Slice/loadingSlice";
+import { projectServ } from "../../../../services/projectServ";
 import { updateProjectList } from "../../../../redux/Slice/projectSlice";
-import toastify from "../../../../utils/toastify/toastify";
-import ProjectButtonAction from "./ProjectButtonAction";
 
 const ProjectManagementDesktop = () => {
   const dispatch = useDispatch();
@@ -36,14 +28,13 @@ const ProjectManagementDesktop = () => {
     setFilteredInfo({});
     setSortedInfo({});
   };
-  const setAgeSort = () => {
+  const setNameSort = () => {
     setSortedInfo({
       order: "descend",
       columnKey: "age",
     });
   };
   const { projectList } = useSelector((state) => state.projectSlice);
-  console.log(projectList);
 
   useEffect(() => {
     dispatch(setLoadingStart());
@@ -54,7 +45,7 @@ const ProjectManagementDesktop = () => {
         dispatch(setLoadingEnd());
       })
       .catch((err) => {
-        toastify("error", err.response.data.content);
+        message.error(err.response.data.content);
         dispatch(setLoadingEnd());
       });
   }, []);
@@ -65,6 +56,19 @@ const ProjectManagementDesktop = () => {
       dataIndex: "projectName",
       key: "projectName",
       width: "20%",
+      render: (projectName, project) => {
+        return (
+          <span
+            key={project.id}
+            className="projectName text-lg font-semibold cursor-pointer hover:text-red-500 duration-300"
+            onClick={() => {
+              window.location.href = `/project-detail/${project.id}`;
+            }}
+          >
+            {projectName}
+          </span>
+        );
+      },
     },
     {
       title: <span className="text-lg">Category</span>,
@@ -76,8 +80,12 @@ const ProjectManagementDesktop = () => {
       title: <span className="text-lg">Creator</span>,
       key: "creator",
       width: "20%",
-      render: (text, record, index) => {
-        return <Tag color="green">{record.creator?.name}</Tag>;
+      render: (record) => {
+        return (
+          <Tag key={record.creator.id} color="green">
+            {record.creator.name}
+          </Tag>
+        );
       },
     },
     {
@@ -85,12 +93,25 @@ const ProjectManagementDesktop = () => {
       dataIndex: "members",
       key: "members",
       width: "20%",
+      render: (members) => {
+        return (
+          <>
+            {members.map((member) => {
+              return (
+                <Tag key={member.userId} color="blue">
+                  {member.name}
+                </Tag>
+              );
+            })}
+          </>
+        );
+      },
     },
     {
       title: <span className="text-lg">Action</span>,
       key: "action",
-      render: (text, record, index) => {
-        return <ProjectButtonAction/>;
+      render: (project) => {
+        return <ProjectButtonAction project={project} />;
       },
     },
   ];
@@ -114,7 +135,7 @@ const ProjectManagementDesktop = () => {
           marginBottom: 16,
         }}
       >
-        <Button onClick={setAgeSort}>Sort age</Button>
+        <Button onClick={setNameSort}>Sort name</Button>
         <Button onClick={clearFilters}>Clear filters</Button>
         <Button onClick={clearAll}>Clear filters and sorters</Button>
       </Space>

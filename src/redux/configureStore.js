@@ -14,3 +14,5 @@ export const store = configureStore({
     projectSlice,
   },
 });
+
+export const AppDispatch = store.dispatch;

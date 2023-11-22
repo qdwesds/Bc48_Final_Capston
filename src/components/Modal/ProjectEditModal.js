@@ -1,21 +1,16 @@
+import { Button, Form, Input, Select } from "antd";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
 import * as Yup from "yup";
-import { Button, Form, Input, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import "./../../assets/Style/style.scss";
 import { projectServ } from "../../services/projectServ";
+import EditDescriptionModal from "./EditDescriptionModal";
 import { getAllProjectCategory } from "../../redux/Slice/projectCategorySlice";
-import EditDescription from "../EditDescription/EditDescription";
-import { setLoadingEnd, setLoadingStart } from "../../redux/Slice/loadingSlice";
-import { useNavigate } from "react-router-dom";
-import toastify from "../../utils/toastify/toastify";
-import { putProjectDetail } from "../../redux/Slice/projectSlice";
 
-const ProjectForm = () => {
+
+const ProjectEditModal = ({project, handleOnSubmit}) => {
   const { Option } = Select;
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
     projectServ
@@ -29,38 +24,26 @@ const ProjectForm = () => {
       });
   }, []);
 
-  const { projectCategoryArr } = useSelector(
-    (state) => state.projectCategorySlice
-  );
+  const getInitialValue = () => {
+    if (project) {
+      const categoryId = project.categoryId
+        ? project.categoryId
+        : project.projectCategory.id;
+      return {
+        categoryId,
+        projectName: project.projectName,
+        description: project.description,
+      };
+    }
+    return { categoryId: projectCategoryArr[0]?.id || 1 };
+    
+  };
+  const initialValues = getInitialValue();
 
   const formik = useFormik({
-    initialValues: {
-      projectName: "",
-      description: "",
-      categoryId: 1,
-    },
+    initialValues: initialValues,
     onSubmit: (values) => {
-      dispatch(setLoadingStart());
-      const newProject = { ...values };
-      if (!values.description) {
-        newProject.description = "";
-      }
-      projectServ
-        .createProject(newProject)
-        .then((res) => {
-          dispatch(putProjectDetail(res.data.content));
-          setTimeout(() => {
-            navigate("/");
-            dispatch(setLoadingEnd());
-            toastify("success", "Create project successfully!");
-          }, 2500);
-        })
-        .catch((err) => {
-          console.log(err);
-          setTimeout(() => {
-            toastify("error", err.response.data.content);
-          }, 2500);
-        });
+      handleOnSubmit(values);
     },
     validationSchema: Yup.object().shape({
       projectName: Yup.string().required(
@@ -69,6 +52,10 @@ const ProjectForm = () => {
       categoryId: Yup.string().required("Please do not leave Category empty"),
     }),
   });
+
+  const { projectCategoryArr } = useSelector(
+    (state) => state.projectCategorySlice
+  );
 
   const {
     handleSubmit,
@@ -82,7 +69,6 @@ const ProjectForm = () => {
   } = formik;
 
   const handleEditorChange = (content, editor) => {
-    console.log("content", content);
     setFieldValue("description", content);
   };
   return (
@@ -116,7 +102,10 @@ const ProjectForm = () => {
           <label>Description</label>
         </div>
         <div className="formInput">
-          <EditDescription handleEditorChange={handleEditorChange} />
+          <EditDescriptionModal
+            project={project}
+            handleEditorChange={handleEditorChange}
+          />
         </div>
       </Form.Item>
       <Form.Item name="categoryId">
@@ -132,12 +121,8 @@ const ProjectForm = () => {
             onBlur={handleBlur}
             value={values.categoryId.projectCategoryName}
           >
-            {projectCategoryArr.map((item, index) => {
-              return (
-                <Option key={index}>
-                  {item.projectCategoryName}
-                </Option>
-              );
+            {projectCategoryArr?.map((item, index) => {
+              return <Option key={index}>{item.projectCategoryName}</Option>;
             })}
           </Select>
         </div>
@@ -149,9 +134,9 @@ const ProjectForm = () => {
         <Button
           type="primary"
           htmlType="submit"
-          className="btn-login bg-cyan-500 text-white border-none rounded-[4px] hover:bg-cyan-400 font-semibold text-lg transition-all duration-[400ms] order-2"
+          className="bg-cyan-500 capitalize text-white border-none rounded-[4px] hover:bg-cyan-400 font-semibold text-lg transition-all duration-[400ms] order-2"
         >
-          Create Project
+          Update Project
         </Button>
         <Button
           htmlType="button"
@@ -165,4 +150,4 @@ const ProjectForm = () => {
   );
 };
 
-export default ProjectForm;
+export default ProjectEditModal;

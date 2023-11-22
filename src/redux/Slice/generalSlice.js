@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   isDrawerOpen: false,
@@ -30,6 +30,6 @@ const generalSlice = createSlice({
   },
 });
 
-export const {toggleCollapseSidebar, collapseSidebar} = generalSlice.actions;
+export const {toggleCollapseSidebar, closeDrawer, collapseSidebar, handleDrawerOpen} = generalSlice.actions;
 
 export default generalSlice.reducer;
