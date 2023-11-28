@@ -18,5 +18,11 @@ export const userServ = {
   },
   editProfile: async (userInfo) => {
     return await https.put(`/api/Users/editUser`, userInfo);
-  }
+  },
+  getUserByProjectId: async (id) => {
+    return https.get(`/api/Users/getUserByProjectId?idProject=${id}`);
+  },
+  getUserByKeyword: async (keyword) => {
+    return await https.get(`/api/Users/getUser?keyword=${keyword}`)
+  },
 };

@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { collapseSidebar } from "../../redux/Slice/generalSlice";
 import generalHooks from "../../utils/generalHooks/generalHooks";
-import logo from "./../../assets/Img/jiraCloneLogo.png"
+import logo from "./../../assets/Img/jiraCloneLogo.png";
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -30,6 +30,30 @@ const Sidebar = () => {
     "/project-detail/:projectId": "project-detail",
   };
   const currentPath = generalHooks.usePathPattern();
+
+  const disabledRender = () => {
+    if (projectID === undefined) {
+      return (
+        <a
+          className="text-base font-semibold"
+          disabled={true}
+          style={{
+            color: "#ccc",
+            backgroundColor: "#eee",
+            cursor: "not-allowed",
+            opacity: 0.5,
+            textTransform: "none",
+            transform: "none",
+          }}
+        >
+          Project Detail{" "}
+          <span className="text-sm text-gray-400 font-normal">{projectID}</span>
+        </a>
+      );
+    } else {
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (currentPath) {
@@ -117,7 +141,9 @@ const Sidebar = () => {
               <a
                 className="text-base font-semibold"
                 onClick={() => {
-                  handleMenuClick(`/project-detail/${projectID}`);
+                  if (projectID) {
+                    handleMenuClick(`/project-detail/${projectID}`);
+                  }
                 }}
               >
                 Project Detail{" "}
@@ -126,7 +152,7 @@ const Sidebar = () => {
                 </span>
               </a>
             ),
-            disabled: projectID ? false : true,
+            disabled: disabledRender(),
           },
           {
             key: "profile",

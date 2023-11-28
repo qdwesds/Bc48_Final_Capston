@@ -13,8 +13,6 @@ import {
 } from "../../../../redux/Slice/loadingSlice";
 import { handleDrawerOpen } from "../../../../redux/Slice/generalSlice";
 import ProjectEdit from "./ProjectEdit";
-import { updateProjectList } from "../../../../redux/Slice/projectSlice";
-import toastify from "../../../../utils/toastify/toastify";
 
 const ProjectButtonAction = ({ project }) => {
   const dispatch = useDispatch();
@@ -26,9 +24,7 @@ const ProjectButtonAction = ({ project }) => {
     projectServ
       .deleteProject(project.id)
       .then((res) => {
-        toastify("success", "Deleted project successfully!")
-        dispatch(updateProjectList());
-        dispatch(setLoadingEnd());
+        dispatch(projectServ.getAllAndDispatch("Project deleted"))
       })
       .catch((err) => {
         message.error(err.response.data.content);

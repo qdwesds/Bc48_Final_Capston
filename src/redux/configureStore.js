@@ -4,7 +4,10 @@ import generalSlice from "./Slice/generalSlice";
 import loadingSlice from "./Slice/loadingSlice";
 import projectCategorySlice from "./Slice/projectCategorySlice";
 import projectSlice from "./Slice/projectSlice";
-
+import modalSlice from "./Slice/modalSlice";
+import taskSlice
+ from "./Slice/taskSlice";
+import thunk from "redux-thunk";
 export const store = configureStore({
   reducer: {
     userSlice,
@@ -12,7 +15,10 @@ export const store = configureStore({
     loadingSlice,
     projectCategorySlice,
     projectSlice,
+    modalSlice,
+    taskSlice,
   },
+  middleware: [thunk]
 });
 
-export const AppDispatch = store.dispatch;
+export const AppDispatch =  store.dispatch;

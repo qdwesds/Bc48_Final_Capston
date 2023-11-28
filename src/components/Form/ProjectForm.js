@@ -1,149 +1,95 @@
-import { useFormik } from "formik";
 import React, { useEffect } from "react";
-import * as Yup from "yup";
 import { Button, Form, Input, Select } from "antd";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import "./../../assets/Style/style.scss";
-import { projectServ } from "../../services/projectServ";
-import { getAllProjectCategory } from "../../redux/Slice/projectCategorySlice";
 import EditDescription from "../EditDescription/EditDescription";
-import { setLoadingEnd, setLoadingStart } from "../../redux/Slice/loadingSlice";
-import { useNavigate } from "react-router-dom";
-import toastify from "../../utils/toastify/toastify";
-import { putProjectDetail } from "../../redux/Slice/projectSlice";
+import { useFetchProjectCatList } from "../../hooks/useFetchProjectCatList";
 
-const ProjectForm = () => {
-  const { Option } = Select;
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    projectServ
-      .getAllProjectCategory()
-      .then((res) => {
-        console.log(res);
-        dispatch(getAllProjectCategory(res.data.content));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
-
+const ProjectForm = ({
+  layout = "horizontal",
+  size = "large",
+  project,
+  confirmText,
+  handleOnFinish,
+}) => {
+  const [form] = Form.useForm();
   const { projectCategoryArr } = useSelector(
     (state) => state.projectCategorySlice
   );
-
-  const formik = useFormik({
-    initialValues: {
-      projectName: "",
-      description: "",
-      categoryId: 1,
-    },
-    onSubmit: (values) => {
-      dispatch(setLoadingStart());
-      const newProject = { ...values };
-      if (!values.description) {
-        newProject.description = "";
-      }
-      projectServ
-        .createProject(newProject)
-        .then((res) => {
-          dispatch(putProjectDetail(res.data.content));
-          setTimeout(() => {
-            navigate("/");
-            dispatch(setLoadingEnd());
-            toastify("success", "Create project successfully!");
-          }, 2500);
-        })
-        .catch((err) => {
-          console.log(err);
-          setTimeout(() => {
-            toastify("error", err.response.data.content);
-          }, 2500);
-        });
-    },
-    validationSchema: Yup.object().shape({
-      projectName: Yup.string().required(
-        "Please do not leave Project name empty"
-      ),
-      categoryId: Yup.string().required("Please do not leave Category empty"),
-    }),
-  });
-
-  const {
-    handleSubmit,
-    handleChange,
-    handleBlur,
-    values,
-    setFieldValue,
-    errors,
-    touched,
-    resetForm,
-  } = formik;
-
-  const handleEditorChange = (content, editor) => {
-    console.log("content", content);
-    setFieldValue("description", content);
+  const { Option } = Select;
+  const getInitialValue = () => {
+    if (project) {
+      const categoryId = project.categoryId
+        ? project.categoryId
+        : project.projectCategory.id;
+      return {
+        categoryId,
+        projectName: project.projectName,
+        description: project.description,
+      };
+    }
+    return { categoryId: projectCategoryArr[0]?.id || 1 };
   };
+  const initialValues = getInitialValue();
+
+  useFetchProjectCatList();
+
+  useEffect(() => {
+    form.setFieldsValue(initialValues);
+  }, [form, initialValues]);
+
+  const onFinish = (values) => {
+    handleOnFinish(values);
+  };
+
+  const onReset = () => {
+    form.resetFields();
+  };
+
+  const formProps = { form, onFinish, layout, size };
+  const labelItem = (labelText) => (
+    <p className="text-lg font-medium text-blue-400 capitalize">
+       {labelText}
+    </p>
+  );
   return (
-    <Form
-      id="projectForm"
-      onFinish={handleSubmit}
-      size="large"
-      layout="vertical"
-    >
-      <Form.Item>
-        <div className="formLable">
-          <label>
-            <span className="text-red-600">*</span> Name
-          </label>
-        </div>
-        <div className="formInput">
-          <Input
-            name="projectName"
-            placeholder="Project name"
-            onChange={handleChange}
-            onBlur={handleBlur}
-            value={values.projectName}
-          />
-        </div>
-        {errors.projectName && touched.projectName && (
-          <span className="text-red-500">{errors.projectName}</span>
-        )}
+    <Form name="project_form" className="myform projectForm" {...formProps}>
+      <Form.Item
+        name="projectName"
+        rules={[
+          {
+            required: true,
+            message: "Please do not leave ${name} empty",
+          },
+          { max: 80, message: "Project name can't extend 80 characters." },
+        ]}
+        label={labelItem("name")}
+      >
+        <Input
+          placeholder="My project..."
+          className="py-2 px-5 rounded-md"
+          name="projectName"
+        />
       </Form.Item>
-      <Form.Item name="description">
-        <div className="formLable">
-          <label>Description</label>
-        </div>
-        <div className="formInput">
-          <EditDescription handleEditorChange={handleEditorChange} />
-        </div>
+      <Form.Item name="description" label={labelItem("description")}>
+        <EditDescription formInstance={form}/>
       </Form.Item>
-      <Form.Item name="categoryId">
-        <div className="formLable">
-          <label>
-            <span className="text-red-600">*</span> Project Category
-          </label>
-        </div>
-        <div className="formSelect">
-          <Select
-            className="selectCategory"
-            onChange={handleChange}
-            onBlur={handleBlur}
-            value={values.categoryId.projectCategoryName}
-          >
-            {projectCategoryArr.map((item, index) => {
-              return (
-                <Option key={index}>
-                  {item.projectCategoryName}
-                </Option>
-              );
-            })}
-          </Select>
-        </div>
-        {errors.categoryId && touched.categoryId && (
-          <span className="text-red-500">{errors.categoryId}</span>
-        )}
+      <Form.Item
+        name="categoryId"
+        rules={[
+          { required: true, message: "Please do not leave Category empty" },
+        ]}
+        label={labelItem("Project Category")}
+      >
+        <Select className="select-category">
+          {projectCategoryArr.map((item, index) => {
+            return (
+              <Option key={item.id.toString() + index} value={item.id}>
+                {item.projectCategoryName}
+              </Option>
+            );
+          })}
+        </Select>
       </Form.Item>
       <Form.Item className="form-btn-group">
         <Button
@@ -151,11 +97,11 @@ const ProjectForm = () => {
           htmlType="submit"
           className="btn-login bg-cyan-500 text-white border-none rounded-[4px] hover:bg-cyan-400 font-semibold text-lg transition-all duration-[400ms] order-2"
         >
-          Create Project
+          {confirmText}
         </Button>
         <Button
           htmlType="button"
-          onClick={resetForm}
+          onClick={onReset}
           className="btn-reset btn-txt--underlined border-none text-[#6B778C] text-lg order-1"
         >
           Reset

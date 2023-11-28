@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Button, Space, Table, Tag, message } from "antd";
+import React, { useState } from "react";
+import { Button, Space, Table, Tag } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import ProjectButtonAction from "./ProjectButtonAction";
-import {
-  setLoadingEnd,
-  setLoadingStart,
-} from "../../../../redux/Slice/loadingSlice";
 import { projectServ } from "../../../../services/projectServ";
 import { updateProjectList } from "../../../../redux/Slice/projectSlice";
+import projectHooks from "../../../../hooks/projectHooks";
+import ProjectMembers from "./ProjectMembers";
 
 const ProjectManagementDesktop = () => {
   const dispatch = useDispatch();
@@ -31,24 +29,12 @@ const ProjectManagementDesktop = () => {
   const setNameSort = () => {
     setSortedInfo({
       order: "descend",
-      columnKey: "age",
+      columnKey: "projectName",
     });
   };
   const { projectList } = useSelector((state) => state.projectSlice);
 
-  useEffect(() => {
-    dispatch(setLoadingStart());
-    projectServ
-      .getAllProject()
-      .then((res) => {
-        dispatch(updateProjectList(res.data.content));
-        dispatch(setLoadingEnd());
-      })
-      .catch((err) => {
-        message.error(err.response.data.content);
-        dispatch(setLoadingEnd());
-      });
-  }, []);
+  projectHooks.useFetchProjectList(null);
 
   const columns = [
     {
@@ -93,24 +79,20 @@ const ProjectManagementDesktop = () => {
       dataIndex: "members",
       key: "members",
       width: "20%",
-      render: (members) => {
+      render: (members, project) => {
         return (
-          <>
-            {members.map((member) => {
-              return (
-                <Tag key={member.userId} color="blue">
-                  {member.name}
-                </Tag>
-              );
-            })}
-          </>
+          <ProjectMembers
+            projectId={project.id}
+            projectName={project.projectName}
+            members={members}
+          />
         );
       },
     },
     {
       title: <span className="text-lg">Action</span>,
       key: "action",
-      render: (project) => {
+      render: (_, project) => {
         return <ProjectButtonAction project={project} />;
       },
     },
